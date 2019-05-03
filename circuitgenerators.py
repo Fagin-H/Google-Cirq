@@ -117,7 +117,37 @@ def modmult(a, N, b_qubits, x_qubits, anc):
     for gate in reversecir(qft(b_qubits)): # Applies the reverse qft.
         yield gate
 
-
+'''
+Creates a generator for a quantum multiplyer that takes |x>|0> -> |(ax)MOD N>|0> controlled by a qubit c.
+zeros_qubits is a list of ancilla qubits all set to 0.
+x_qubits is a list of qubits where x is stored.
+zeros_qubits should have the same size as x_qubits.
+anc is a list where anc[0] is an ancilla qubit that should be set to 0, anc[1] is the control qubit.
+'''
+def c_ua(a, N, zeros_qubits, x_qubits, anc):
+    
+    def egcd(a, b): # Finds the gcd of 2 numbers.
+        if a == 0:
+            return (b, 0, 1)
+        else:
+            g, y, x = egcd(b % a, a)
+            return (g, x - (b // a) * y, y)
+    
+    def modinv(a, m): # Finds the modular inverse if one exsists.
+        g, x, y = egcd(a, m)
+        if g != 1:
+            raise Exception('modular inverse does not exist')
+        else:
+            return x % m
+    
+    for gate in modmult(a, N, zeros_qubits, x_qubits, anc): # Multiplies a and x and stores it in zeros_qubits.
+        yield gate
+    
+    for i, x in enumerate(x_qubits): # Swaps the registers for zeros_qubits and x_qubits.
+        yield cirq.ControlledGate(SWAP)(anc[1], x, zeros_qubits[i])
+        
+    for gate in reversecir(modmult(modinv(a, N), N, zeros_qubits, x_qubits, anc)): # Applies the inverse leaving zeros_qubits at all 0's again.
+        yield gate
 
 
 

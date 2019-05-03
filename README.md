@@ -52,3 +52,11 @@ modmult:
     Send |x>|b> --> |x>|b + (ax)MOD N> conditioned on a control qubit.
     Calling modmult(a, N, b_qubits, x_qubits, anc) will return a generator where a and N are the values above, b_qubits are the qubits holding the value b, x_qubits hold the value x, anc is a list where anc[0] is an ancilla qubit set to 0 and anc[1] is the control qubit.
     Make sure N > b, x and that b and x always have a buffer such that the msf is 0 at the start.
+
+c_ua:
+    Creates a generator for a quantum multiplyer that takes |x>|0> -> |(ax)MOD N>|0> controlled by a qubit c.
+    zeros_qubits is a list of ancilla qubits all set to 0.
+    x_qubits is a list of qubits where x is stored.
+    zeros_qubits should have the same size as x_qubits.
+    anc is a list where anc[0] is an ancilla qubit that should be set to 0, anc[1] is the control qubit.
+    c_ua(a, N, zeros_qubits, x_qubits, anc) will take |x>_n|0>_n to |(ax)MOD N>_n|0>_n
