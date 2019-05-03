@@ -151,6 +151,41 @@ def c_ua(a, N, zeros_qubits, x_qubits, anc):
 
 
 
+def order_find(a, N, zeros_qubits, x_qubits, anc0, m_qubits):
+    
+    m_qubits.reverse()
+    
+    for qubit in m_qubits:
+        yield H(qubit)
+    
+    for qubit in x_qubits:
+        yield X(qubit)
+    
+    for i, c in enumerate(m_qubits):
+        yield c_ua(a**(2**i)%N, N, zeros_qubits, x_qubits, [anc0, c])
+    
+    for gate in reversecir(qft(m_qubits)): # Applies the reverse qft.
+        yield gate
+    
+    yield measure(*m_qubits, key='q')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
