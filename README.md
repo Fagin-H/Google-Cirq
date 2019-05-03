@@ -6,6 +6,7 @@ qft:
     Including an array of 0's and 1's relating to the starting states of qubits as initial = [] will also set the starting states of the qubits to the desired state.
     Adding the variable tol = t will restrict all controlled gates to only act on qubits distance t away.
     Setting mea = True will add measurement at the end of the circuit.
+    Including control = [] for some list of qubits will add control qubits to the entire circuit.
     
     Example:
         cirq.Circuit.from_ops(qft([cirq.GridQubit(i,0) for i in range(10)], initial = [0,0,0,0,0,0,0,0,1,0], tol = 6, mea = False)) 
@@ -35,4 +36,5 @@ qft:
 psiadd:
     This function creates a generator that will apply rotational Z gates to a list of given qubits b_qubits such that if b_qubits is the quantum fourier transform of a classical number b, the output will be a + b in the fourier space.
     Setting sin = -1 will instead subtract a from b.
+    Including control = [] for some list of qubits will add control qubits to the entire circuit.
     For example importing psiadd, then running circuit.append(psiadd(3,qubits), strategy=InsertStrategy.NEW) where qubits is a list of qubits to act on will append n rotational Z gates to the circuit in this case adding 3 to fourier transformed number in qubits.
