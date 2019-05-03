@@ -34,4 +34,5 @@ qft:
 
 psiadd:
     This function creates a generator that will apply rotational Z gates to a list of given qubits b_qubits such that if b_qubits is the quantum fourier transform of a classical number b, the output will be a + b in the fourier space.
+    Setting sin = -1 will instead subtract a from b.
     For example importing psiadd, then running circuit.append(psiadd(3,qubits), strategy=InsertStrategy.NEW) where qubits is a list of qubits to act on will append n rotational Z gates to the circuit in this case adding 3 to fourier transformed number in qubits.

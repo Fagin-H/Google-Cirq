@@ -32,7 +32,7 @@ def qft(qubits, tol = None, mea = False, initial = None):
 # Creates a generator for a quantum adder, adding classical input a to a quantum fourier transformed number b.
 # a is an integer number to be added to b.
 # b_qubits is are the qubits that hold the quantum fourier transformed number b.
-def psiadd(a, b_qubits):
+def psiadd(a, b_qubits, sin = 1):
     quno = len(b_qubits) # This section of code turns the number a into a binary number then into a list, adding extra zeros if it is too small.
     a_ = [int(i) for i in bin(a)[2:]]
     a_.reverse()
@@ -46,4 +46,4 @@ def psiadd(a, b_qubits):
         for j in range(quno-i):
             if a_[j] == 1:
                 w += 1/2**(quno - j - i - 1)
-        yield ZP(exponent = w)(b_qubits[quno-i-1])
+        yield ZP(exponent = sin * w)(b_qubits[quno-i-1])
