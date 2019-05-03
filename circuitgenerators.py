@@ -81,9 +81,11 @@ def modadd(a, N, b_qubits, anc):
     for gate in psiadd(a, b_qubits, -1, [anc[1], anc[2]]): # Subtracts a from b in the fouier space conditioned on the 2 qubits in anc.
         yield gate
     
-    for gate in reversecir(qft(b_qubits)): # Performs the inverse qft, applies turns anc[0] to 0 if the msf is 1 ensuring it will end in the same state, then applies the qft.
+    for gate in reversecir(qft(b_qubits)): # Performs the inverse qft, turns anc[0] to 0 ensuring it will end in the same state, then applies the qft.
         yield gate
+    yield X(b_qubits[0])
     yield CX(b_qubits[0], anc[0])
+    yield X(b_qubits[0])
     for gate in qft(b_qubits):
         yield gate
         
