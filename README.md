@@ -37,4 +37,12 @@ psiadd:
     This function creates a generator that will apply rotational Z gates to a list of given qubits b_qubits such that if b_qubits is the quantum fourier transform of a classical number b, the output will be a + b in the fourier space.
     Setting sin = -1 will instead subtract a from b.
     Including control = [] for some list of qubits will add control qubits to the entire circuit.
-    For example importing psiadd, then running circuit.append(psiadd(3,qubits), strategy=InsertStrategy.NEW) where qubits is a list of qubits to act on will append n rotational Z gates to the circuit in this case adding 3 to fourier transformed number in qubits.
+    For example importing psiadd then running circuit.append(psiadd(3,qubits), strategy=InsertStrategy.NEW) where qubits is a list of qubits to act on will append n rotational Z gates to the circuit in this case adding 3 to fourier transformed number in qubits.
+
+modadd:
+    Applies a + b (MOD N) conditioned on 2 given qubits.
+    a is an integer number to be added to b.
+    N is the modulo number
+    b_qubits is are the qubits that hold the quantum fourier transformed number b.
+    anc is a list of qubits, anc[0] should be an ancilla qubit set to 0, anc[1] and anc[2] are control qubits that can be used with other circuits.
+    For example importing modadd then running Circuit.append(modadd(1, 6, qubits, [cirq.GridQubit(3,i) for i in range(3)]),strategy=InsertStrategy.NEW) where qubits are the qubits that have the qft number b stored will return a circuit that gives 1 + b (MOD 6) if anc[1] and anc[2] are both in state 1.

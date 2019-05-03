@@ -1,4 +1,4 @@
-from cirq.ops import CZPowGate as CZP, H, X, SWAP, measure, ZPowGate as ZP
+from cirq.ops import CZPowGate as CZP, H, X, SWAP, measure, ZPowGate as ZP, CNOT as CX
 from numpy import zeros
 import cirq
 
@@ -50,3 +50,66 @@ def psiadd(a, b_qubits, sin = 1, control = ()):
             if a_[j] == 1:
                 w += 1/2**(quno - j - i - 1)
         yield cirq.ControlledGate(ZP(exponent = sin * w), num_controls = len(control))(*control, b_qubits[quno-i-1])
+
+
+# Creates a generator for a quantum adder modulo N, adding classical input a to a quantum fourier transformed number b.
+# a is an integer number to be added to b.
+# N is the modulo number
+# b_qubits is are the qubits that hold the quantum fourier transformed number b.
+# anc is a list of qubits, anc[0] should be an ancilla qubit set to 0, anc[1] and anc[2] are control qubits that can be used with other circuits.
+def modadd(a, N, b_qubits, anc):
+    
+    def reversecir(cir): # Creates a function to reverse a quantum circuit, used to calculate the inverse qft.
+        cir = [i for i in cir]
+        cir.reverse()
+        for gate in cir:
+           yield gate**-1
+    
+    for gate in psiadd(a, b_qubits, 1, [anc[1], anc[2]]): # Adds a to b in the fouier space conditioned on the 2 qubits in anc.
+        yield gate
+    for gate in psiadd(N, b_qubits, -1): # Subtracts N from b in the fouier space.
+        yield gate
+    
+    for gate in reversecir(qft(b_qubits)): # Performs the inverse qft, applies turns anc[0] to 1 if the msf is 1, then applies the qft.
+        yield gate
+    yield CX(b_qubits[0], anc[0])
+    for gate in qft(b_qubits):
+        yield gate
+        
+    for gate in psiadd(N, b_qubits, 1, [anc[0]]): # Adds N to b in the fouier space conditioned on anc[0].
+        yield gate
+    for gate in psiadd(a, b_qubits, -1, [anc[1], anc[2]]): # Subtracts a from b in the fouier space conditioned on the 2 qubits in anc.
+        yield gate
+    
+    for gate in reversecir(qft(b_qubits)): # Performs the inverse qft, applies turns anc[0] to 0 if the msf is 1 ensuring it will end in the same state, then applies the qft.
+        yield gate
+    yield CX(b_qubits[0], anc[0])
+    for gate in qft(b_qubits):
+        yield gate
+        
+    for gate in psiadd(a, b_qubits, 1, [anc[1], anc[2]]): # Adds a to b in the fouier space conditioned on the 2 qubits in anc.
+        yield gate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
