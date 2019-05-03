@@ -2,12 +2,23 @@ from cirq.ops import CZPowGate as CZP, H, X, SWAP, measure, ZPowGate as ZP, CNOT
 from numpy import zeros
 import cirq
 
-# Creates a generator for a quantum fourier transform circuit.
-# qubts is a list of qubits in a linear array.
-# tol is the maximum number of qubits the controlled gates will be applied, lower tol will lead to less accurate results.
-# Set mea to True if you want it to add measurements at the end.
-# initial takes an array of 0's and 1's relating to the starting state of the qubits, leave blank to set to all 0's.
-# control is a list of qubits to be used as control bits.
+'''
+Creates a function to reverse a quantum circuit, used to calculate the inverse qft.
+'''
+def reversecir(cir): 
+        cir = [i for i in cir]
+        cir.reverse()
+        for gate in cir:
+           yield gate**-1
+
+'''
+Creates a generator for a quantum fourier transform circuit.
+qubts is a list of qubits in a linear array.
+tol is the maximum number of qubits the controlled gates will be applied, lower tol will lead to less accurate results.
+Set mea to True if you want it to add measurements at the end.
+initial takes an array of 0's and 1's relating to the starting state of the qubits, leave blank to set to all 0's.
+control is a list of qubits to be used as control bits.
+'''
 def qft(qubits, tol = None, mea = False, initial = None, control = ()):
     size = len(qubits)
     if tol == None: # Sets maximum distance of controlled gates to cover entire circuit if not given.
@@ -30,14 +41,15 @@ def qft(qubits, tol = None, mea = False, initial = None, control = ()):
     for i in range(size): # Adds measurement operators at the end of the circuit if mea is set to true.
         if mea:
             yield measure(qubits[i], key='q{}'.format(str(i)))
-
-# Creates a generator for a quantum adder, adding classical input a to a quantum fourier transformed number b.
-# a is an integer number to be added to b.
-# b_qubits is are the qubits that hold the quantum fourier transformed number b.
-# control is a list of qubits to be used as control bits.
+'''
+Creates a generator for a quantum adder, adding classical input a to a quantum fourier transformed number b.
+a is an integer number to be added to b.
+b_qubits is are the qubits that hold the quantum fourier transformed number b.
+control is a list of qubits to be used as control bits.
+'''
 def psiadd(a, b_qubits, sin = 1, control = ()):
     quno = len(b_qubits) # This section of code turns the number a into a binary number then into a list, adding extra zeros if it is too small.
-    a_ = [int(i) for i in bin(a)[2:]]
+    a_ = [int(i) for i in bin(int(a))[2:]]
     a_.reverse()
     if len(a_) < quno:
         for i in range(quno-len(a_)):
@@ -51,19 +63,14 @@ def psiadd(a, b_qubits, sin = 1, control = ()):
                 w += 1/2**(quno - j - i - 1)
         yield cirq.ControlledGate(ZP(exponent = sin * w), num_controls = len(control))(*control, b_qubits[quno-i-1])
 
-
-# Creates a generator for a quantum adder modulo N, adding classical input a to a quantum fourier transformed number b.
-# a is an integer number to be added to b.
-# N is the modulo number
-# b_qubits is are the qubits that hold the quantum fourier transformed number b.
-# anc is a list of qubits, anc[0] should be an ancilla qubit set to 0, anc[1] and anc[2] are control qubits that can be used with other circuits.
+'''
+Creates a generator for a quantum adder modulo N, adding classical input a to a quantum fourier transformed number b.
+a is an integer number to be added to b.
+N is the modulo number
+b_qubits is are the qubits that hold the quantum fourier transformed number b.
+anc is a list of qubits, anc[0] should be an ancilla qubit set to 0, anc[1] and anc[2] are control qubits that can be used with other circuits.
+'''
 def modadd(a, N, b_qubits, anc):
-    
-    def reversecir(cir): # Creates a function to reverse a quantum circuit, used to calculate the inverse qft.
-        cir = [i for i in cir]
-        cir.reverse()
-        for gate in cir:
-           yield gate**-1
     
     for gate in psiadd(a, b_qubits, 1, [anc[1], anc[2]]): # Adds a to b in the fouier space conditioned on the 2 qubits in anc.
         yield gate
@@ -90,6 +97,24 @@ def modadd(a, N, b_qubits, anc):
         yield gate
         
     for gate in psiadd(a, b_qubits, 1, [anc[1], anc[2]]): # Adds a to b in the fouier space conditioned on the 2 qubits in anc.
+        yield gate
+
+'''
+Creates a generator for a quantum multiplyer that takes |x>|b> -> |x>|b + (ax)MOD N> controlled by a qubit c.
+b_qubits is a list of qubits where b is stored.
+x_qubits is a list of qubits where x is stored.
+anc is a list where anc[0] is an ancilla qubit that should be set to 0, anc[1] is the control qubit.
+'''
+def modmult(a, N, b_qubits, x_qubits, anc):
+    
+    for gate in qft(b_qubits): # Applies the qft to b.
+        yield gate
+        
+    for i, x_qubit in enumerate(x_qubits): # Applies the modulo addition function a number of times with a scaling factor of 2 each time to simulate multiplying x by a in fourier space.
+        for gate in modadd((2**(len(x_qubits)-i-1))*a, N, b_qubits, [anc[0], anc[1], x_qubit]):
+            yield gate
+    
+    for gate in reversecir(qft(b_qubits)): # Applies the reverse qft.
         yield gate
 
 

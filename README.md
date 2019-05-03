@@ -45,4 +45,10 @@ modadd:
     N is the modulo number
     b_qubits is are the qubits that hold the quantum fourier transformed number b.
     anc is a list of qubits, anc[0] should be an ancilla qubit set to 0, anc[1] and anc[2] are control qubits that can be used with other circuits.
+    Make sure N > b and that b always has a buffer such that the msf is 0 at the start.
     For example importing modadd then running Circuit.append(modadd(1, 6, qubits, [cirq.GridQubit(3,i) for i in range(3)]),strategy=InsertStrategy.NEW) where qubits are the qubits that have the qft number b stored will return a circuit that gives 1 + b (MOD 6) if anc[1] and anc[2] are both in state 1.
+    
+modmult:
+    Send |x>|b> --> |x>|b + (ax)MOD N> conditioned on a control qubit.
+    Calling modmult(a, N, b_qubits, x_qubits, anc) will return a generator where a and N are the values above, b_qubits are the qubits holding the value b, x_qubits hold the value x, anc is a list where anc[0] is an ancilla qubit set to 0 and anc[1] is the control qubit.
+    Make sure N > b, x and that b and x always have a buffer such that the msf is 0 at the start.
