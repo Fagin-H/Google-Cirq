@@ -97,7 +97,7 @@ def factor_N(N, a, reps = 5):
         
     for i in range(N): # Finds Q and q such that N^2 < Q < 2N^2.
         q = i
-        Q = 2**q
+        Q = 2**(q)
         if N**2 <= Q:
             break
         
@@ -138,7 +138,7 @@ def shors(N, a = 0, reps =  5, attemps = 1):
     
     if found:
         
-        return True, (egcd(a**(rs[0]/2) + 1, N), egcd(a**(rs[0]/2) - 1, N))
+        return True, (egcd(a**(rs[0]/2) + 1, N)[0], egcd(a**(rs[0]/2) - 1, N)[0])
     else:
         return False, []
     
