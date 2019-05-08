@@ -60,3 +60,10 @@ c_ua:
     zeros_qubits should have the same size as x_qubits.
     anc is a list where anc[0] is an ancilla qubit that should be set to 0, anc[1] is the control qubit.
     c_ua(a, N, zeros_qubits, x_qubits, anc) will take |x>_n|0>_n to |(ax)MOD N>_n|0>_n
+	
+order_find:
+	Uses the example in https://arxiv.org/pdf/quant-ph/0205095.pdf to find the order given N and a with n the bit length of N. 
+	zeros_qubits is a list of n ancilla qubits all set to 0.
+    x_qubits is a list of n qubits set to 0.
+    m_qubits is a list of 2n qubits set to 0.
+    anc0 is an ancilla qubit that should be set to 0.

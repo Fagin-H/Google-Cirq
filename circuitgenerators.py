@@ -150,21 +150,29 @@ def c_ua(a, N, zeros_qubits, x_qubits, anc):
         yield gate
 
 
-
+'''
+Returns a generator that implements the order finding algorithm for Shors algorithm.
+a is the trial number a to be used, the bit length of a shall be called n.
+N is the number to be factored.
+zeros_qubits is a lits of n qubits all set to 0.
+x_qubits is a list of n+1 qubits all set to 0.
+anc_0 is a ancilla qubit set to 0.
+m_qubits are qubits that will be measured, a list of 2n qubits all set to 0.
+'''
 def order_find(a, N, zeros_qubits, x_qubits, anc0, m_qubits):
     
-    m_qubits.reverse()
+    m_qubits.reverse() # Reverces the order of the measurment qubits so the order is cosistant with the other programs.
     
-    for qubit in m_qubits:
+    for qubit in m_qubits: # Applies hadamards to the measurment qubits.
         yield H(qubit)
     
-    for qubit in x_qubits:
+    for qubit in x_qubits: # Sets the x qubits to 1.
         yield X(qubit)
     
-    for i, c in enumerate(m_qubits):
+    for i, c in enumerate(m_qubits): # applies sucessive multiplying gates to x_qubits controlled by the measurment qubits.
         yield c_ua(a**(2**i)%N, N, zeros_qubits, x_qubits, [anc0, c])
     
-    for gate in reversecir(qft(m_qubits)): # Applies the reverse qft.
+    for gate in reversecir(qft(m_qubits)): # Applies the reverse qft on the measurment qubits.
         yield gate
     
     yield measure(*m_qubits, key='q')
